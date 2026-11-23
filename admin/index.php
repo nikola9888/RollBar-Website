@@ -10,6 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     rb_check_csrf();
     $action = (string)($_POST['action'] ?? '');
     if ($action === 'login' && !$loggedIn) {
+        $blockedUntil = (int)($_SESSION['rb_login_blocked_until'] ?? 0);
+        if ($blockedUntil > time()) { $error = 'Previše pokušaja. Pokušajte ponovo za nekoliko minuta.'; }
+        else {
         $username = trim((string)($_POST['username'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
         $stmt = $pdo->prepare('SELECT id,password_hash FROM admins WHERE username=? LIMIT 1');
@@ -21,14 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
             header('Location: index.php'); exit;
         }
         $error = 'Pogrešno korisničko ime ili lozinka.';
+            $_SESSION['rb_login_tries'] = (int)($_SESSION['rb_login_tries'] ?? 0) + 1;
+            if ($_SESSION['rb_login_tries'] >= 5) { $_SESSION['rb_login_blocked_until'] = time() + 900; $_SESSION['rb_login_tries'] = 0; }
+        }
     } elseif ($action === 'logout' && $loggedIn) {
         $_SESSION = []; session_regenerate_id(true); header('Location: index.php'); exit;
     } elseif ($action === 'status' && $loggedIn) {
         $id = filter_var($_POST['order_id'] ?? null, FILTER_VALIDATE_INT);
         $status = (string)($_POST['status'] ?? '');
         if ($id && array_key_exists($status, rb_statuses())) {
-            $stmt = $pdo->prepare('UPDATE orders SET status=?,updated_at=? WHERE id=?');
-            $stmt->execute([$status,date('Y-m-d H:i:s'),$id]);
+            $etaRaw = trim((string)($_POST['eta_minutes'] ?? ''));
+            $eta = ($etaRaw !== '' && ctype_digit($etaRaw)) ? min(240,(int)$etaRaw) : null;
+            $stmt = $pdo->prepare('UPDATE orders SET status=?,eta_minutes=?,updated_at=? WHERE id=?');
+            $stmt->execute([$status,$eta,date('Y-m-d H:i:s'),$id]);
         }
         header('Location: index.php'); exit;
     }
@@ -51,10 +59,10 @@ $lastId = 0; foreach ($orders as $o) $lastId = max($lastId,(int)$o['id']);
 <?php else: ?><header class="head"><div><h1>ROLL BAR 013</h1><div>Administracija porudžbina</div></div><form method="post"><input type="hidden" name="csrf" value="<?=rb_h(rb_csrf())?>"><button name="action" value="logout">ODJAVA</button></form></header><p class="refresh">Automatsko osvežavanje na 15 sekundi. Nove porudžbine se zvučno oglašavaju dok je ova stranica otvorena.</p>
 <?php if(!$orders):?><div class="empty">Još nema porudžbina.</div><?php endif;?>
 <?php foreach($orders as $o):?><article class="order" data-order-id="<?=$o['id']?>"><div class="head"><div><h2><?=rb_h($o['order_code'])?></h2><div class="meta"><?=rb_h($o['created_at'])?> · <span class="status"><?=rb_h(rb_statuses()[$o['status']]??$o['status'])?></span></div></div><div class="total"><?=number_format((int)$o['total'],0,',','.')?> RSD</div></div>
-<p><b><?=rb_h($o['customer_name'])?></b> · <a style="color:#ff6a00" href="tel:<?=rb_h($o['phone'])?>"><?=rb_h($o['phone'])?></a><br><?= $o['order_type']==='delivery' ? 'Dostava: '.rb_h($o['address']) : 'Lično preuzimanje' ?></p>
+<?php if (!empty($o['eta_minutes'])): ?><p class="status">Procena: <?= (int)$o['eta_minutes'] ?> min</p><?php endif; ?><p><b><?=rb_h($o['customer_name'])?></b> · <a style="color:#ff6a00" href="tel:<?=rb_h($o['phone'])?>"><?=rb_h($o['phone'])?></a><br><?= $o['order_type']==='delivery' ? 'Dostava: '.rb_h($o['address']) : 'Lično preuzimanje' ?></p>
 <div class="items"><?php foreach($o['items'] as $it):?><?=rb_h($it['product_name'])?> × <?= (int)$it['quantity']?> — <?=number_format((int)$it['line_total'],0,',','.')?> RSD<br><?php endforeach;?></div>
 <?php if($o['note']!==''):?><p>Napomena: <?=nl2br(rb_h($o['note']))?></p><?php endif;?>
-<form class="actions" method="post"><input type="hidden" name="csrf" value="<?=rb_h(rb_csrf())?>"><input type="hidden" name="order_id" value="<?=$o['id']?>"><select name="status"><?php foreach(rb_statuses() as $key=>$label):?><option value="<?=rb_h($key)?>" <?=$o['status']===$key?'selected':''?>><?=rb_h($label)?></option><?php endforeach;?></select><button name="action" value="status">SAČUVAJ STATUS</button></form></article><?php endforeach;?>
+<form class="actions" method="post"><input type="hidden" name="csrf" value="<?=rb_h(rb_csrf())?>"><input type="hidden" name="order_id" value="<?=$o['id']?>"><input type="number" name="eta_minutes" min="1" max="240" placeholder="ETA min." value="<?=!empty($o['eta_minutes'])?(int)$o['eta_minutes']:''?>" style="width:105px;background:#080808;color:#fff;border:1px solid #555;padding:9px;border-radius:7px"><select name="status"><?php foreach(rb_statuses() as $key=>$label):?><option value="<?=rb_h($key)?>" <?=$o['status']===$key?'selected':''?>><?=rb_h($label)?></option><?php endforeach;?></select><button name="action" value="status">SAČUVAJ STATUS</button></form></article><?php endforeach;?>
 <?php endif;?></div>
 <?php if($loggedIn):?><script>
 const currentMax=<?= (int)$lastId ?>;let audioReady=false;let audioCtx=null;
