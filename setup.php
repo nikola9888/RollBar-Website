@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already) {
                 address TEXT NOT NULL DEFAULT '',
                 note TEXT NOT NULL DEFAULT '',
                 total INTEGER NOT NULL,
+                eta_minutes INTEGER NULL,
                 status TEXT NOT NULL DEFAULT 'new',
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
@@ -67,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already) {
 <style>
 *{box-sizing:border-box}body{margin:0;background:#080808;color:#fff;font:16px Arial,sans-serif;display:grid;min-height:100vh;place-items:center;padding:20px}.panel{width:min(100%,460px);background:#151515;border:1px solid #333;border-top:4px solid #ff6a00;border-radius:16px;padding:26px}h1{margin:0 0 8px;color:#ff6a00}p{color:#bbb;line-height:1.5}label{display:block;margin:16px 0 7px}input{width:100%;padding:13px;border-radius:9px;border:1px solid #444;background:#080808;color:#fff}button{margin-top:20px;width:100%;padding:14px;border:0;border-radius:9px;background:#ff6a00;color:#fff;font-weight:bold;font-size:16px}.error{color:#ff8a70}.ok{color:#9be29b}
 </style></head><body><main class="panel"><h1>ROLL BAR 013</h1><h2>Podešavanje poručivanja</h2>
-<?php if ($already): ?><p class="ok">Sistem je već podešen. Iz bezbednosnih razloga setup više nije dostupan.</p><p>Obrišite fajl <b>setup.php</b> sa servera.</p>
-<?php elseif ($success): ?><p class="ok">Administratorski nalog je napravljen. Korisničko ime je <b>admin</b>.</p><p>Obrišite fajl <b>setup.php</b> sa servera, pa otvorite <b>/admin/</b>.</p>
+<?php if ($success): ?><p class="ok">Administratorski nalog je napravljen. Korisničko ime je <b>admin</b>.</p><p>Obrišite fajl <b>setup.php</b> sa servera, pa otvorite <b>/admin/</b>.</p>
+<?php elseif ($already): ?><p class="ok">Sistem je već podešen. Iz bezbednosnih razloga setup više nije dostupan.</p><p>Obrišite fajl <b>setup.php</b> sa servera.</p>
 <?php else: ?><p>Postavite administratorsku lozinku. Korisničko ime će biti <b>admin</b>. Lozinka se čuva kao bezbedan hash.</p>
 <?php if ($error): ?><p class="error"><?=rb_h($error)?></p><?php endif; ?>
 <form method="post"><input type="hidden" name="csrf" value="<?=rb_h(rb_csrf())?>">
