@@ -4,7 +4,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
 
 $products = [
     ['Chicken-Roll',630],['Crispy Chicken-Roll',660],['Mexico-Roll',770],['Greek-Roll',680],['Beef-Roll',1680],['Vege-Roll',530],
-    ['Extra Smash',200],['Classic-Smash',640],['CheeseBurger',720],['Smash-Bacon',800],['Smash-Jalapeño',800],['Chicken-Classic',620],
+    ['Extra Smash',200],['Classic-Smash',640],['CheeseBurger',720],['Smash-Bacon',800],['Smash-Jalapeño',800],['Chicken-Classic',620],['+ OBROK (uz burger)',270],
     ['Crispy Chicken Sandwich',450],['Cheese Chicken Sandwich',460],['Sausage Deluxe Sandwich',560],['Philly Cheese Sandwich',580],['Fil Chicken Sandwich',470],
     ['Caesar',860],['Ranch salata',690],['Beef salata',1680],['Burger salata',760],
     ['Chicken-Nuggets',640],['Pomfrit Cheddar',420],['Onion Rings',260],['Pomfrit',210],
@@ -26,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address = trim((string)($_POST['address'] ?? ''));
     $note = trim((string)($_POST['note'] ?? ''));
     $rawItems = json_decode((string)($_POST['cart_json'] ?? ''), true);
-    if ($name === '' || mb_strlen($name) > 100) $errors[] = 'Unesite ime i prezime.';
+    if ($name === '' || strlen($name) > 100) $errors[] = 'Unesite ime i prezime.';
     if (!preg_match('/^[0-9+\s().-]{6,25}$/', $phone)) $errors[] = 'Unesite ispravan broj telefona.';
     if (!in_array($type, ['delivery','pickup'], true)) $errors[] = 'Izaberite dostavu ili lično preuzimanje.';
-    if ($type === 'delivery' && ($address === '' || mb_strlen($address) > 250)) $errors[] = 'Unesite adresu za dostavu.';
-    if (mb_strlen($note) > 500) $errors[] = 'Napomena može imati najviše 500 karaktera.';
+    if ($type === 'delivery' && ($address === '' || strlen($address) > 250)) $errors[] = 'Unesite adresu za dostavu.';
+    if (strlen($note) > 500) $errors[] = 'Napomena može imati najviše 500 karaktera.';
     if (!is_array($rawItems) || count($rawItems) < 1 || count($rawItems) > 50) $errors[] = 'Korpa je prazna ili neispravna.';
     $clean = []; $total = 0;
     if (is_array($rawItems)) {
@@ -65,13 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $csrf = rb_csrf();
 $groups = [
 'TORTILJE'=>array_slice($products,0,6),
-'SMASH BURGERI'=>array_slice($products,6,6),
-'SENDVIČI'=>array_slice($products,12,5),
-'SALATE'=>array_slice($products,17,4),
-'FINGER FOOD'=>array_slice($products,21,4),
-'PIĆE'=>array_slice($products,25,7),
-'SOSEVI'=>array_slice($products,32,6),
-'DEZERTI'=>array_slice($products,38,1)
+'SMASH BURGERI'=>array_slice($products,6,7),
+'SENDVIČI'=>array_slice($products,13,5),
+'SALATE'=>array_slice($products,18,4),
+'FINGER FOOD'=>array_slice($products,22,4),
+'PIĆE'=>array_slice($products,26,7),
+'SOSEVI'=>array_slice($products,33,6),
+'DEZERTI'=>array_slice($products,39,1)
 ];
 ?>
 <!doctype html><html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Poruči online | Roll Bar 013</title>
@@ -85,7 +85,7 @@ $groups = [
 <div class="layout"><div class="menu">
 <?php foreach ($groups as $group=>$items): ?><section class="group"><h2><?=rb_h($group)?></h2>
 <?php foreach ($items as $item): ?><article class="product"><div><b><?=rb_h($item[0])?></b><span class="price"><?=number_format($item[1],0,',','.')?> RSD</span></div><button class="add" type="button" data-name="<?=rb_h($item[0])?>" data-price="<?=$item[1]?>">DODAJ</button></article><?php endforeach; ?>
-<?php if ($group==='SMASH BURGERI'): ?><p class="hint">+ OBROK 270 RSD (pomfrit + sos + sok) trenutno nije posebna stavka u korpi.</p><?php endif; ?>
+<?php if ($group==='SMASH BURGERI'): ?><p class="hint">Dodatak + OBROK 270 RSD (pomfrit + sos + sok) dodaje se u korpu posebno, uz burger.</p><?php endif; ?>
 </section><?php endforeach; ?></div>
 <aside><section class="cart"><h2>Tvoja korpa</h2><div id="cartItems" class="empty">Korpa je prazna.</div><div class="total"><span>Ukupno</span><span id="cartTotal">0 RSD</span></div></section>
 <section class="checkout"><h2>Podaci za porudžbinu</h2><form id="orderForm" method="post"><input type="hidden" name="csrf" value="<?=rb_h($csrf)?>"><input type="hidden" name="cart_json" id="cartJson">
