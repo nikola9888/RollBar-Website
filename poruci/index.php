@@ -88,7 +88,7 @@ $groups = [
 <?php if ($group==='SMASH BURGERI'): ?><p class="hint">Dodatak + OBROK 270 RSD (pomfrit + sos + sok) dodaje se u korpu posebno, uz burger.</p><?php endif; ?>
 </section><?php endforeach; ?></div>
 <aside><section class="cart" id="cartPanel"><h2 class="cart-title">Tvoja korpa <span class="cart-count" id="cartCount">0</span></h2><div id="cartItems" class="empty">Korpa je prazna.</div><div class="total"><span>Ukupno</span><span id="cartTotal">0 RSD</span></div></section>
-<section class="checkout"><h2>Podaci za porudžbinu</h2><form id="orderForm" method="post"><input type="hidden" name="csrf" value="<?=rb_h($csrf)?>"><input type="hidden" name="cart_json" id="cartJson">
+<section class="checkout"><h2>Podaci za porudžbinu</h2><form id="orderForm" action="/poruci/index.php" method="post"><input type="hidden" name="csrf" value="<?=rb_h($csrf)?>"><input type="hidden" name="cart_json" id="cartJson">
 <div class="field"><label for="customer_name">Ime i prezime</label><input id="customer_name" name="customer_name" maxlength="100" required></div>
 <div class="field"><label for="phone">Broj telefona</label><input id="phone" name="phone" type="tel" maxlength="25" required></div>
 <div class="field"><label for="order_type">Način preuzimanja</label><select id="order_type" name="order_type"><option value="delivery">Dostava</option><option value="pickup">Lično preuzimanje</option></select></div>
