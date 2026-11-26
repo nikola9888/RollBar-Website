@@ -130,13 +130,32 @@ h1 {
 }
 
 .delivery {
+    display: block;
     background: #FF6A00;
     color: #fff;
-    padding: 14px;
+    padding: 16px 14px;
     border-radius: 14px;
     text-align: center;
-    font-weight: 800;
+    font-weight: 900;
+    font-size: 18px;
+    text-decoration: none;
     margin-bottom: 25px;
+    box-shadow: 0 5px 18px rgba(255,106,0,.25);
+    transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.delivery:hover {
+    background: #ff7b1f;
+    box-shadow: 0 7px 22px rgba(255,106,0,.35);
+}
+
+.delivery:active {
+    transform: scale(.97);
+}
+
+.delivery:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
 }
 
 .phone {
@@ -356,7 +375,7 @@ KUĆNA DOSTAVA!
 </details>
 
 <!-- DOSTAVA -->
-<div class="delivery">KUĆNA DOSTAVA!</div>
+<a class="delivery" href="https://rollbar013.rs/poruci/">PORUČI OVDE!</a>
 
 <p class="phone">
 <a href="tel:+38163817515">063 815 7515</a>
