@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 date_default_timezone_set('Europe/Belgrade');
 
-const RB_DB_DIR = __DIR__ . '/../../private';
+const RB_DB_DIR = __DIR__ . '/../private';
 const RB_DB_FILE = RB_DB_DIR . '/rollbar_orders.sqlite';
 
 function rb_db(): PDO {
